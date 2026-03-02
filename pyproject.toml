@@ -1,0 +1,8 @@
+[project]
+name = "bugs"
+version = "0.1.0"
+description = "Intentionally buggy Python project for testing RepoMind"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
