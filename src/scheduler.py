@@ -1,5 +1,5 @@
 """
-🐛 Extremely Difficult Bug: Task scheduler with dependency resolution.
+Task scheduler with dependency resolution.
 
 This is a multi-class system with cascading bugs across components.
 
@@ -81,11 +81,9 @@ class TaskScheduler:
             visited.add(name)
             order.append(name)
 
-        # 🐛 BUG 1: Only starts DFS from tasks that have dependencies
-        # Tasks with no dependencies but that ARE dependencies of others
-        # may never be visited — and cycles in isolated subgraphs are missed
-        for name, task in self._tasks.items():
-            if task.dependencies:  # Should be: if name not in visited
+        # Fix Bug 1: Start DFS from all tasks, not just those with dependencies
+        for name in self._tasks:
+            if name not in visited:
                 dfs(name)
 
         return order
@@ -103,15 +101,13 @@ class TaskScheduler:
         if not task:
             return 0
 
-        # 🐛 BUG 2: Doesn't add the task to visited BEFORE recursing
-        # This means in a diamond dependency (A->B->D, A->C->D),
-        # D's priority is counted MULTIPLE TIMES, inflating the result
+        # Fix Bug 2: Add task to visited before recursing
+        visited.add(name)
         total = task.priority
         for dep in task.dependencies:
             if dep not in visited:
                 total += self._calc_priority(dep, visited)
 
-        visited.add(name)  # Should be BEFORE the loop, not after
         return total
 
     def get_parallel_groups(self) -> list[list[str]]:
@@ -131,11 +127,9 @@ class TaskScheduler:
                 depths[name] = 0
                 return 0
 
-            # 🐛 BUG 3: Uses max instead of max+1
-            # This puts a task at the SAME level as its deepest dependency
-            # instead of one level AFTER it
+            # Fix Bug 3: Use max+1 instead of max
             max_dep_depth = max(get_depth(dep) for dep in task.dependencies)
-            depths[name] = max_dep_depth  # Should be max_dep_depth + 1
+            depths[name] = max_dep_depth + 1
 
             return depths[name]
 
@@ -166,14 +160,12 @@ class TaskScheduler:
             if t.status != TaskStatus.PENDING:
                 continue
 
-            # 🐛 BUG 4: Checks if ANY dependency is completed instead of ALL
-            # This means a task becomes "ready" as soon as ONE dep finishes,
-            # not when ALL deps are done
-            if any(
+            # Fix Bug 4: Use all() instead of any()
+            if all(
                 self._tasks[dep].status == TaskStatus.COMPLETED
                 for dep in t.dependencies
                 if dep in self._tasks
-            ):  # Should be `all(...)` not `any(...)`
+            ):  
                 t.status = TaskStatus.READY
                 newly_ready.append(t_name)
 
