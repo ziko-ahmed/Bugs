@@ -22,7 +22,7 @@ class TestExecutionOrder:
         s.add_task("dep_task", dependencies=["standalone"])
 
         order = s.get_execution_order()
-        assert "standalone" in order      # Will fail: skipped because it has no dependencies
+        assert "standalone" in order      
         assert "dep_task" in order
 
     def test_cycle_detection(self):
@@ -46,7 +46,7 @@ class TestExecutionOrder:
         s.add_task("B", dependencies=["A"])
 
         with pytest.raises(CycleError):
-            s.get_execution_order()   # Will fail: disconnected cycle not detected
+            s.get_execution_order()  
 
 
 class TestPriority:
@@ -76,7 +76,7 @@ class TestPriority:
         s.add_task("A", priority=1, dependencies=["B", "C"])
 
         # A(1) + B(2) + C(3) + D(10) = 16 (D counted once)
-        assert s.calculate_effective_priority("A") == 16  # Will fail: D counted twice = 26
+        assert s.calculate_effective_priority("A") == 16  
 
 
 class TestParallelGroups:
@@ -99,7 +99,7 @@ class TestParallelGroups:
         s.add_task("A", dependencies=["B"])
 
         groups = s.get_parallel_groups()
-        assert len(groups) == 3        # Will fail: tasks end up in same groups
+        assert len(groups) == 3        
         assert "C" in groups[0]
         assert "B" in groups[1]
         assert "A" in groups[2]
@@ -139,7 +139,7 @@ class TestTaskCompletion:
 
         # Complete only A — B should NOT be ready yet
         newly_ready = s.complete_task("A")
-        assert "B" not in newly_ready     # Will fail: any() triggers ready too early
+        assert "B" not in newly_ready     
         assert s.get_task("B").status == TaskStatus.PENDING
 
         # Complete C — NOW B should be ready
