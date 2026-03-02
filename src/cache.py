@@ -29,9 +29,7 @@ class LRUCache:
             return default
 
         self._hits += 1
-        # 🐛 BUG: should call move_to_end(key, last=True) to mark as recently used
-        # Without this, the access order is never updated, so "LRU" eviction
-        # is actually "insertion order" eviction — evicts oldest INSERT, not oldest ACCESS
+        self._cache.move_to_end(key, last=True)  # Update access order
         return self._cache[key]
 
     def put(self, key: str, value: Any) -> None:
@@ -41,10 +39,9 @@ class LRUCache:
             self._cache.move_to_end(key, last=True)
             return
 
-        if len(self._cache) >= self.max_size:
-            # 🐛 BUG: last=True removes the MOST recently used item!
-            # Should be last=False to remove the LEAST recently used item
-            self._cache.popitem(last=True)
+        if len(self._cache) >= self.max_size and self.max_size > 0:
+            # Remove the least recently used item
+            self._cache.popitem(last=False)
 
         self._cache[key] = value
 

@@ -28,9 +28,9 @@ class TestLRUCache:
         cache.put("c", 3)
         cache.put("d", 4)  # Should evict 'a' (LRU)
 
-        assert cache.get("a") is None    # Will fail: evicts 'c' (MRU) instead of 'a'
+        assert cache.get("a") is None    # 'a' was evicted
         assert cache.get("b") == 2
-        assert cache.get("c") == 3       # Will fail: 'c' was wrongly evicted
+        assert cache.get("c") == 3
         assert cache.get("d") == 4
 
     def test_access_updates_recency(self):
@@ -50,7 +50,7 @@ class TestLRUCache:
         cache.put("d", 4)
 
         assert cache.get("a") == 1       # Should still be here
-        assert cache.get("b") is None    # Will fail: 'a' access didn't update recency
+        assert cache.get("b") is None    # 'b' was evicted
         assert cache.get("c") == 3
         assert cache.get("d") == 4
 
@@ -74,7 +74,7 @@ class TestLRUCache:
         cache.get("a")         # hit
         cache.get("b")         # miss
         cache.get("a")         # hit
-        assert cache.hit_rate == pytest.approx(2 / 3)
+        assert cache.hit_rate == 2 / 3
 
     def test_clear(self):
         cache = LRUCache(max_size=3)
